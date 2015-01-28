@@ -68,6 +68,10 @@ sub parse_request ($$) {
     $first =~ s/^\s+|\s+$//g;
     my ($meth, $rel_url) = split /\s+/, $first, 2;
     my $url = "http://localhost:$ServerPortForClient" . $rel_url;
+    if ($rel_url =~ m!^https*://!)
+    {
+        $url = $rel_url;
+    }
 
     my $content = do { local $/; <$in> };
     if ($content) {
