@@ -247,13 +247,27 @@ sub run_test_helper ($$) {
             #is($content, $expected, "$name - response_body - response is expected");
         }
 
-    } elsif (defined $block->response_body_like) {
+    } elsif (defined $block->response_body_like
+            || defined $block->response_body_unlike)
+    {
+        my $expected_pat;
+        my $type;
+        my $cmp;
+        if (defined $block->response_body_like) {
+            $expected_pat = $block->response_body_like;
+            $type = "like";
+            $cmp = \&like;
+        } else {
+            $expected_pat = $block->response_body_unlike;
+            $type = "unlike";
+            $cmp = \&unlike;
+        }
+
         my $content = $res->content;
         if (defined $content) {
             $content =~ s/^TE: deflate,gzip;q=0\.3\r\n//gms;
         }
         $content =~ s/^Connection: TE, close\r\n//gms;
-        my $expected_pat = $block->response_body_like;
         $expected_pat =~ s/\$ServerPort\b/$ServerPort/g;
         $expected_pat =~ s/\$ServerPortForClient\b/$ServerPortForClient/g;
         my $summary = trim($content);
@@ -263,7 +277,7 @@ sub run_test_helper ($$) {
                 Test::More::skip("$name - tests skipped due to $dry_run", 1);
             }
         } else {
-            like($content, qr/$expected_pat/s, "$name - response_body_like - response is expected ($summary)");
+            $cmp->($content, qr/$expected_pat/s, "$name - response_body_$type - response is expected ($summary)");
         }
     }
 }
