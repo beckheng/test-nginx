@@ -171,7 +171,10 @@ sub run_test_helper ($$) {
 
     my $res = HTTP::Response->new;
     unless ($dry_run) {
+        my $max_redirect = $UserAgent->max_redirect();
+        $UserAgent->max_redirect(0);
         $res = $UserAgent->request($req);
+        $UserAgent->max_redirect($max_redirect);
     }
 
     #warn "res returned!!!";
