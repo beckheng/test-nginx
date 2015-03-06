@@ -132,7 +132,10 @@ sub run_test_helper ($$) {
         if ($method eq 'GET' or $method eq 'HEAD') {
             croak "HTTP 1.0/1.1 $method request should not have content: $content";
         }
+        $content =~ s/\r?\n$//;
         $req->content($content);
+        $req->header('Content-Type' => 'application/x-www-form-urlencoded');
+        $req->header('Content-Length' => length($content));
     } elsif ($method eq 'POST' or $method eq 'PUT') {
         my $chunks = $block->chunked_body;
         if (defined $chunks) {
