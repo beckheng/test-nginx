@@ -146,7 +146,13 @@ sub run_test_helper ($$) {
 
             my $start_delay = $block->start_chunk_delay || 0;
             my $middle_delay = $block->middle_chunk_delay || 0;
-            $req->content(chunk_it($chunks, $start_delay, $middle_delay));
+			my $chunkContent = chunk_it($chunks, $start_delay, $middle_delay)->();
+            $req->content($chunkContent);
+			if ($method eq 'POST')
+			{
+				$req->header('Content-Type' => 'application/x-www-form-urlencoded');
+				$req->header('Content-Length' => length($chunkContent));
+			}
             if (!defined $req->header('Content-Type')) {
                 $req->header('Content-Type' => 'text/plain');
             }
